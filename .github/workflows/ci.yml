@@ -15,14 +15,14 @@ jobs:
       # 1. Check out your code
       - uses: actions/checkout@v3
 
-      # 2. Set up JDK 17 (or whatever version you’re using)
+      # 2. Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
-      # 3. Cache Maven dependencies between runs
+      # 3. Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -41,44 +41,39 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
 
-      # 1. Log in to DockerHub (store DOCKERHUB_USERNAME & DOCKERHUB_TOKEN as repo secrets)
-      - name: Log in to DockerHub
+      # 1. Log in to GHCR using PAT
+      - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
 
       # 2. Build the image
       - name: Build Docker image
         run: |
-          docker build \
-            --file Dockerfile \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/medical-register:${{ github.sha }} \
-            .
+          IMAGE=ghcr.io/${{ github.repository_owner }}/medical-register:${{ github.sha }}
+          docker build -t $IMAGE .
 
-      # 3. Push it
+      # 3. Push it to GHCR
       - name: Push image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/medical-register:${{ github.sha }}
+          IMAGE=ghcr.io/${{ github.repository_owner }}/medical-register:${{ github.sha }}
+          docker push $IMAGE
 
   deploy:
     needs: docker-build-push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      # This is an example for a Kubernetes cluster; adjust to your environment
+      # example: deploy to k8s
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
 
       - name: Deploy to Kubernetes
         env:
-          IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/medical-register:${{ github.sha }}
+          IMAGE=ghcr.io/${{ github.repository_owner }}/medical-register:${{ github.sha }}
         run: |
           kubectl set image deployment/medical-register medical-register=$IMAGE --namespace production
           kubectl rollout status deployment/medical-register --namespace production
