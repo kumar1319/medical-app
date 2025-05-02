@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Medical Register Login</title>
+  <meta charset="UTF-8"/>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+  <script>
+    let auth0 = null;
+
+    async function initAuth0() {
+      auth0 = await createAuth0Client({ 
+        domain: "dev-sqo40jqvj08mzb4x.us.auth0.com",
+        client_id: "xnCqHzInTTJz8MDzYzX3WgW0sNrjY5x7",
+        audience: "https://medical-api",
+        cacheLocation: "localstorage",
+        useRefreshTokens: true
+      });
+
+      await auth0.loginWithRedirect({
+        redirect_uri: window.location.origin + "/patients.xhtml"
+      });
+    }
+  </script>
+</head>
+<body onload="initAuth0()">
+  <p>Redirecting to login...</p>
+</body>
+</html>

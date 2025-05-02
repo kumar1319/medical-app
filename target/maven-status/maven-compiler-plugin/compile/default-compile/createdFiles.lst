@@ -1,0 +1,6 @@
+com/medicalregister/service/PatientService.class
+com/medicalregister/model/Patient.class
+com/medicalregister/controller/PatientController.class
+com/medicalregister/MedicalRegisterApplication.class
+com/medicalregister/repository/PatientRepository.class
+com/medicalregister/config/SecurityConfig.class

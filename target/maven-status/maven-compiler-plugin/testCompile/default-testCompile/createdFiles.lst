@@ -1,0 +1,5 @@
+com/medicalregister/repository/PatientRepositoryTest.class
+com/medicalregister/service/PatientServiceTest.class
+com/medicalregister/controller/PatientControllerTest.class
+com/medicalregister/config/SecurityConfigTest.class
+com/medicalregister/model/PatientTest.class

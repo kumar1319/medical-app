@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Medical Register – Patients</title>
+  <meta charset="UTF-8"/>
+
+  <!-- Inline CSS for clean layout -->
+  <style type="text/css">
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background: #f7f9fc;
+      color: #333;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    #authStatus {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin-left: 0.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    section {
+      background: white;
+      padding: 1rem;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    section h3 {
+      margin-top: 0;
+    }
+    input {
+      padding: 0.4rem;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.6rem;
+      border-bottom: 1px solid #ececec;
+      text-align: left;
+    }
+    th {
+      background: #f0f4fa;
+    }
+    tr:hover {
+      background: #f9fbfd;
+    }
+    .actions button {
+      margin-right: 0.3rem;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.9rem;
+    }
+  </style>
+
+  <!-- Auth0 SPA SDK -->
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"
+          type="text/javascript"></script>
+
+  <script type="text/javascript">
+    <![CDATA[
+    let auth0 = null;
+    let editId = null;
+
+    async function configureAuth0() {
+      auth0 = await createAuth0Client({
+        domain: "dev-sqo40jqvj08mzb4x.us.auth0.com",
+        client_id: "xnCqHzInTTJz8MDzYzX3WgW0sNrjY5x7",
+        audience: "https://medical-api",
+        cacheLocation: "localstorage",
+        useRefreshTokens: true
+      });
+      if (location.search.includes("code=") && location.search.includes("state=")) {
+        await auth0.handleRedirectCallback();
+        history.replaceState({}, document.title, location.pathname);
+      }
+      if (await auth0.isAuthenticated()) {
+        localStorage.setItem("access_token", await auth0.getTokenSilently());
+        document.getElementById("authStatus").innerHTML = "✅ Logged in";
+        fetchPatients();
+      } else {
+        await auth0.loginWithRedirect({ redirect_uri: location.origin + "/patients.xhtml" });
+      }
+    }
+
+    async function fetchPatients() {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(location.origin + "/api/patients", {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      const table = document.getElementById("patientsTable");
+      table.innerHTML = "<tr><th>Name</th><th>Age</th><th>History</th><th>Actions</th></tr>";
+      data.forEach(p => {
+        const row = table.insertRow();
+        row.innerHTML =
+                "<td>" + p.name + "</td>" +
+                "<td>" + p.age  + "</td>" +
+                "<td>" + p.medicalHistory + "</td>" +
+                "<td class='actions'>" +
+                "<button onclick='startEdit(" +
+                p.id + ",\"" +
+                p.name.replace(/"/g,'\\"') + "\"," +
+                p.age + ",\"" +
+                p.medicalHistory.replace(/"/g,'\\"') +
+                "\")'>Edit</button>" +
+                "<button onclick='deletePatient(" + p.id + ")'>Delete</button>" +
+                "</td>";
+      });
+    }
+
+    function startEdit(id, name, age, history) {
+      editId = id;
+      document.getElementById("name").value    = name;
+      document.getElementById("age").value     = age;
+      document.getElementById("history").value = history;
+      document.getElementById("saveBtn").innerText = "Update";
+    }
+
+    async function savePatient() {
+      const token = localStorage.getItem("access_token");
+      const payload = {
+        name: document.getElementById("name").value,
+        age:  document.getElementById("age").value,
+        medicalHistory: document.getElementById("history").value
+      };
+      const url = location.origin + "/api/patients" + (editId ? "/" + editId : "");
+      const method = editId ? "PUT" : "POST";
+      await fetch(url, {
+        method,
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify(payload)
+      });
+      resetForm();
+      fetchPatients();
+    }
+
+    function resetForm() {
+      editId = null;
+      document.getElementById("name").value    = "";
+      document.getElementById("age").value     = "";
+      document.getElementById("history").value = "";
+      document.getElementById("saveBtn").innerText = "Add";
+    }
+
+    async function deletePatient(id) {
+      const token = localStorage.getItem("access_token");
+      await fetch(location.origin + "/api/patients/" + id, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      fetchPatients();
+    }
+
+    async function logout() {
+      await auth0.logout({ logoutParams: { returnTo: location.origin + "/patients.xhtml" } });
+      localStorage.removeItem("access_token");
+    }
+
+    window.onload = configureAuth0;
+    ]]>
+  </script>
+</head>
+<body>
+<header>
+  <h1>Medical Register</h1>
+  <div>
+    <span id="authStatus">&#x1F512; Authenticating…</span>
+    <button onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<section>
+  <h3>Add / Edit Patient</h3>
+  <input type="text"   id="name"    placeholder="Name"            />
+  <input type="number" id="age"     placeholder="Age"             />
+  <input type="text"   id="history" placeholder="Medical History" />
+  <button id="saveBtn" onclick="savePatient()">Add</button>
+</section>
+
+<section>
+  <h3>Patient List</h3>
+  <table id="patientsTable">
+    <tr><th>Name</th><th>Age</th><th>History</th><th>Actions</th></tr>
+  </table>
+</section>
+</body>
+</html>
