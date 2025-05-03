@@ -5,20 +5,7 @@
 
 ## 1. System Architecture Overview  
 
-+----------------+        +-----------------+        +---------------+
-|                |  HTTPS |                 |  JDBC  |               |
-|  XHTML Front   | <----> |  Spring Boot    | <----> |   H2 In‑Mem   |
-|  (Static UI)   |        |  Backend API    |        |   Database    |
-|                |        |  (+ Security)   |        +---------------+
-+----------------+        +-----------------+
-       ▲  |                         ▲
-       |  | REST (JSON)            | OAuth2/JWT
-       |  ▼                         |
-+----------------+        +-----------------+
-|                |        |                 |
-|   Auth0 IDM    | <----> |  LDAP Directory |  
-| (OAuth2 Issuer)|        |  (Enterprise)   |
-+----------------+        +-----------------+
+
 <img width="569" alt="Screenshot 2025-05-03 at 12 55 59 PM" src="https://github.com/user-attachments/assets/42eae2b9-3c2a-44e1-a833-4f952a2dfb2b" />
 
 
