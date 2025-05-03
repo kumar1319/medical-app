@@ -46,11 +46,11 @@
 
 - **Auth0 SPA‑JS**
 
-   -createAuth0Client({ domain, client_id, audience }) initializes the SDK.
+   - createAuth0Client({ domain, client_id, audience }) initializes the SDK.
 
-   -loginWithRedirect() sends the browser to Auth0’s hosted login page.
+   - loginWithRedirect() sends the browser to Auth0’s hosted login page.
 
-   -On callback, getTokenSilently() retrieves access token, stored in localStorage.
+   - On callback, getTokenSilently() retrieves access token, stored in localStorage.
 
 - **Spring Security**
 
