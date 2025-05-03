@@ -54,14 +54,14 @@
         oauth2:
           resourceserver:
             jwt:
-              issuer-uri: [https://YOUR_DOMAIN/](https://dev-sqo40jqvj08mzb4x.us.auth0.com/)
+              issuer-uri: (https://dev-sqo40jqvj08mzb4x.us.auth0.com/)
     auth0:
-      issuer: [https://YOUR_DOMAIN/](https://dev-sqo40jqvj08mzb4x.us.auth0.com/)
-      audience: [YOUR_API_IDENTIFIER](https://medical-api)
+      issuer: (https://dev-sqo40jqvj08mzb4x.us.auth0.com/)
+      audience: (https://medical-api)
 
 - Under “Allowed Callback URLs” in Auth0, add http://localhost:8080/patients.xhtml.
 
-** Running Locally **
+* Running Locally *
 
 mvn clean spring-boot:run
 
@@ -71,7 +71,7 @@ mvn clean spring-boot:run
 
 - After login, you can add, view, and delete patients.
 
-**Docker**
+* Docker
 
 Build and run the container locally:
 
@@ -83,10 +83,11 @@ docker build -t medical-register .
 
 # Run it
 docker run --rm -p 8080:8080 \
-  -e SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI=https://YOUR_DOMAIN/ \
-  -e AUTH0_ISSUER=https://YOUR_DOMAIN/ \
-  -e AUTH0_AUDIENCE=YOUR_API_IDENTIFIER \
+  -e SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI=https://dev-sqo40jqvj08mzb4x.us.auth0.com/ \
+  -e AUTH0_ISSUER=https://dev-sqo40jqvj08mzb4x.us.auth0.com/ \
+  -e AUTH0_AUDIENCE=https://medical-api \
   medical-register
+
   
 **CI/CD
 We use GitHub Actions to:**
