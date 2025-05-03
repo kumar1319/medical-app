@@ -24,7 +24,6 @@
    - Auth0 issues JWTs containing scopes: `read:patients`, `write:patients`.  
    - Spring Security maps scopes → `SCOPE_…` authorities and enforces with `@PreAuthorize`.
 
----
 
 ## 2. Assumptions Made  
 
@@ -33,7 +32,7 @@
 - **In‑Memory DB**: H2 is used for simplicity—no external database setup.  
 - **Static Frontend**: XHTML + plain JS; no Node.js/webpack build.
 
----
+
 
 ## 3. Integration Design  
 
@@ -45,49 +44,49 @@
 |                     | H2 Database        | JDBC (Spring JPA) |
 | GitHub Actions CI   | GHCR               | Docker Push       |
 
-- Auth0 SPA‑JS
+- **Auth0 SPA‑JS**
 
-createAuth0Client({ domain, client_id, audience }) initializes the SDK.
+  *createAuth0Client({ domain, client_id, audience }) initializes the SDK.
 
-loginWithRedirect() sends the browser to Auth0’s hosted login page.
+  *loginWithRedirect() sends the browser to Auth0’s hosted login page.
 
-On callback, getTokenSilently() retrieves access token, stored in localStorage.
+  *On callback, getTokenSilently() retrieves access token, stored in localStorage.
 
-Spring Security
+-Spring Security
 
-SecurityFilterChain whitelists /index.xhtml, /patients.xhtml, static assets, favicon, and H2 console.
+   *SecurityFilterChain whitelists /index.xhtml, /patients.xhtml, static assets, favicon, and H2 console.
 
-All other paths require a JWT with the proper audience (https://medical-api) and scopes.
+   *All other paths require a JWT with the proper audience (https://medical-api) and scopes.
 
 **4. Automated Testing**
-Unit Tests
+-Unit Tests
 
-@WebMvcTest(PatientController) + Mockito for PatientService mocking.
+  **@WebMvcTest(PatientController) + Mockito for PatientService mocking.
 
-Verify 401 (no token), 403 (missing scope), 200 (with scope + data).
+  **Verify 401 (no token), 403 (missing scope), 200 (with scope + data).
 
-Integration Tests
+-Integration Tests
 
-@SpringBootTest + @AutoConfigureMockMvc with a test JwtDecoder stub.
+  **@SpringBootTest + @AutoConfigureMockMvc with a test JwtDecoder stub.
 
-@DataJpaTest for repository layer.
+  **@DataJpaTest for repository layer.
 
 **5. CI/CD Pipeline**
-Build & Test: GitHub Actions runs mvn verify on each push or PR to main.
+-**Build & Test**: GitHub Actions runs mvn verify on each push or PR to main.
 
-Docker Build & Publish: Builds an image tagged ghcr.io/<user>/medical-register:<sha> and pushes to GHCR using CR_PAT secret.
+  **Docker Build & Publish: Builds an image tagged ghcr.io/<user>/medical-register:<sha> and pushes to GHCR using CR_PAT secret.
 
-(Optional) Deploy: No‑op step “Skipping deploy” until a cluster is configured.
+  **Deploy: No‑op step “Skipping deploy” until a cluster is configured.
 
 **6. Future Considerations**
-UI Modernization: Migrate to a SPA framework (React/Angular/Vue).
+  **UI Modernization: Migrate to a SPA framework (React/Angular/Vue).
 
-Database Scaling: Move from H2 to PostgreSQL with Flyway migrations.
+  **Database Scaling: Move from H2 to PostgreSQL with Flyway migrations.
 
-RBAC: Define Auth0 roles & map to application authorities.
+  **RBAC: Define Auth0 roles & map to application authorities.
 
-Observability: Centralized logging (ELK) and metrics (Prometheus + Grafana).
+  **Observability: Centralized logging (ELK) and metrics (Prometheus + Grafana).
 
-Enhanced CI/CD: Canary deployments, automated rollback on failures.
+  **Enhanced CI/CD: Canary deployments, automated rollback on failures.
 
-Security Hardening: Enforce HSTS, input sanitization, rate limiting.
+  **Security Hardening: Enforce HSTS, input sanitization, rate limiting.
