@@ -5,17 +5,21 @@
 
 ## 1. System Architecture Overview  
 
-+----------------+ +-----------------+ +---------------+
-| XHTML Frontend | HTTPS | Spring Boot | JDBC | H2 In‑Mem |
-| (Static UI) | <----> | Backend API | <----> | Database |
-+----------------+ +-----------------+ +---------------+
-▲ ▲
-| REST (JSON) | OAuth2/JWT
-| |
-+----------------+ +-----------------+
-| Auth0 Identity |<-----> | LDAP Directory |
-| Provider (IdP) | | (Simulated) |
-+----------------+ +-----------------+
++----------------+        +-----------------+        +---------------+
+|                |  HTTPS |                 |  JDBC  |               |
+|  XHTML Front   | <----> |  Spring Boot    | <----> |   H2 In‑Mem   |
+|  (Static UI)   |        |  Backend API    |        |   Database    |
+|                |        |  (+ Security)   |        +---------------+
++----------------+        +-----------------+
+       ▲  |                         ▲
+       |  | REST (JSON)            | OAuth2/JWT
+       |  ▼                         |
++----------------+        +-----------------+
+|                |        |                 |
+|   Auth0 IDM    | <----> |  LDAP Directory |  
+| (OAuth2 Issuer)|        |  (Enterprise)   |
++----------------+        +-----------------+
+
 
 
 1. **Frontend (XHTML + JS)**  
@@ -54,14 +58,19 @@
 |                     | H2 Database        | JDBC (Spring JPA) |
 | GitHub Actions CI   | GHCR               | Docker Push       |
 
-- **Auth0 SPA‑JS** initializes with  
-  ```js
-  createAuth0Client({
-    domain, client_id, audience,
-    cacheLocation: "localstorage",
-    useRefreshTokens: true
-  })
-Spring Security SecurityFilterChain permits static assets and login pages, locks down all /api/** behind JWT checks.
+- Auth0 SPA‑JS
+
+createAuth0Client({ domain, client_id, audience }) initializes the SDK.
+
+loginWithRedirect() sends the browser to Auth0’s hosted login page.
+
+On callback, getTokenSilently() retrieves access token, stored in localStorage.
+
+Spring Security
+
+SecurityFilterChain whitelists /index.xhtml, /patients.xhtml, static assets, favicon, and H2 console.
+
+All other paths require a JWT with the proper audience (https://medical-api) and scopes.
 
 4. Automated Testing
 Unit Tests
