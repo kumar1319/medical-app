@@ -19,7 +19,7 @@
 |   Auth0 IDM    | <----> |  LDAP Directory |  
 | (OAuth2 Issuer)|        |  (Enterprise)   |
 +----------------+        +-----------------+
-
+<img width="569" alt="Screenshot 2025-05-03 at 12 55 59 PM" src="https://github.com/user-attachments/assets/42eae2b9-3c2a-44e1-a833-4f952a2dfb2b" />
 
 
 1. **Frontend (XHTML + JS)**  
@@ -72,7 +72,7 @@ SecurityFilterChain whitelists /index.xhtml, /patients.xhtml, static assets, fav
 
 All other paths require a JWT with the proper audience (https://medical-api) and scopes.
 
-4. Automated Testing
+**4. Automated Testing**
 Unit Tests
 
 @WebMvcTest(PatientController) + Mockito for PatientService mocking.
@@ -85,14 +85,14 @@ Integration Tests
 
 @DataJpaTest for repository layer.
 
-5. CI/CD Pipeline
+**5. CI/CD Pipeline**
 Build & Test: GitHub Actions runs mvn verify on each push or PR to main.
 
 Docker Build & Publish: Builds an image tagged ghcr.io/<user>/medical-register:<sha> and pushes to GHCR using CR_PAT secret.
 
 (Optional) Deploy: No‑op step “Skipping deploy” until a cluster is configured.
 
-6. Future Considerations
+**6. Future Considerations**
 UI Modernization: Migrate to a SPA framework (React/Angular/Vue).
 
 Database Scaling: Move from H2 to PostgreSQL with Flyway migrations.
