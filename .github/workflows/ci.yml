@@ -67,18 +67,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      # 1. Check out code again (optional but usually needed for k8s manifests)
-      - uses: actions/checkout@v3
-
-      # 2. Set up kubectl
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-
-      # 3. Deploy to Kubernetes
-      - name: Deploy to Kubernetes
-        env:
-          IMAGE: ghcr.io/${{ github.repository_owner }}/medical-register:${{ github.sha }}
-        run: |
-          kubectl set image deployment/medical-register medical-register=$IMAGE --namespace production
-          kubectl rollout status deployment/medical-register --namespace production
-  
+      - - name: Set up kubectl
+      - uses: azure/setup-kubectl@v3
+      -
+      - - name: Deploy to Kubernetes
+      - env:
+      - IMAGE: ghcr.io/${{ github.repository_owner }}/medical-register:${{ github.sha }}
+      - run: |
+      - kubectl set image deployment/medical-register medical-register=$IMAGE --namespace production
+      - kubectl rollout status deployment/medical-register --namespace production
+  +     - name: “Skipping deploy – no cluster configured”
+  +       run: echo "No Kubernetes cluster configured."
